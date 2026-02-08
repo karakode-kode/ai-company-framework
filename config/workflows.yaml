@@ -1,0 +1,61 @@
+workflows:
+  ticket_lifecycle:
+    initial_state: backlog
+    states:
+      backlog:
+        transitions:
+          - target: todo
+            trigger: prioritized
+            guard: has_acceptance_criteria
+
+      todo:
+        transitions:
+          - target: in_progress
+            trigger: agent_assigned
+            action: notify_slack
+
+      in_progress:
+        transitions:
+          - target: in_review
+            trigger: pr_opened
+            action: request_review
+          - target: blocked
+            trigger: blocked
+            action: notify_slack
+
+      blocked:
+        transitions:
+          - target: in_progress
+            trigger: unblocked
+
+      in_review:
+        transitions:
+          - target: done
+            trigger: pr_merged
+            action: close_ticket
+          - target: in_progress
+            trigger: changes_requested
+
+      done:
+        on_enter:
+          - notify_slack
+          - update_metrics
+
+  epic_lifecycle:
+    initial_state: drafting
+    states:
+      drafting:
+        transitions:
+          - target: refined
+            trigger: breakdown_complete
+
+      refined:
+        transitions:
+          - target: active
+            trigger: tickets_created
+
+      active:
+        transitions:
+          - target: completed
+            trigger: all_tickets_done
+            action: notify_slack

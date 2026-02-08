@@ -1,0 +1,31 @@
+agents:
+  product_manager:
+    class: src.agents.product_manager.ProductManagerAgent
+    enabled: true
+    poll_interval_seconds: 30
+    tools:
+      - linear
+      - slack
+    config:
+      linear_team_key: "ENG"
+      default_priority: 3  # Normal
+      label_prefix: "ai-pm"
+
+  developer:
+    class: src.agents.developer.DeveloperAgent
+    enabled: true
+    poll_interval_seconds: 15
+    tools:
+      - linear
+      - github
+      - slack
+    config:
+      github_org: "karakode-kode"
+      branch_prefix: "ai/"
+      auto_pr: true
+      max_concurrent_tickets: 2
+
+defaults:
+  max_retries: 3
+  retry_backoff_seconds: 5
+  health_check_interval_seconds: 60
